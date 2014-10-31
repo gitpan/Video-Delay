@@ -3,9 +3,9 @@ use strict;
 use warnings;
 
 # Modules.
-use Video::Delay::Array;
+use Video::Delay;
 use Test::More 'tests' => 2;
 use Test::NoWarnings;
 
 # Test.
-is($Video::Delay::Array::VERSION, 0.02, 'Version.');
+is($Video::Delay::VERSION, 0.02, 'Version.');
