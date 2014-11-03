@@ -10,7 +10,7 @@ use English qw(-no_match_vars);
 use Error::Pure qw(err);
 
 # Version.
-our $VERSION = 0.02;
+our $VERSION = 0.03;
 
 # Constructor.
 sub new {
@@ -20,7 +20,10 @@ sub new {
 	my $self = bless {}, $class;
 
 	# Math function.
-	$self->{'func'} = '1000 * sin(t)';
+	$self->{'func'} = sub {
+		my $t = shift;
+		return 1000 * sin($t);
+	};
 
 	# Counter increment.
 	$self->{'incr'} = 0.1;
@@ -31,6 +34,11 @@ sub new {
 	# Counter.
 	$self->{'counter'} = 0;
 
+	# Check 'func' parameters.
+	if (ref $self->{'func'} ne '' && ref $self->{'func'} ne 'CODE') {
+		err "Parameter 'func' must be scalar or code.";
+	}
+
 	# Object.
 	return $self;
 }
@@ -39,16 +47,26 @@ sub new {
 sub delay {
 	my $self = shift;
 
-	# Input.
+	# Counter.
 	$self->{'counter'} += $self->{'incr'};
-	my $input = $self->{'func'};
-	my $c = $self->{'counter'};
-	$input =~ s/t/$c/g;
 
-	# Eval.
-	my $ret = eval $input;
-	if ($EVAL_ERROR) {
-		err 'Error in function', 'Error', $EVAL_ERROR;
+	# Function string.
+	my $ret;
+	if (ref $self->{'func'} eq '') {
+		my $input = $self->{'func'};
+		my $c = $self->{'counter'};
+		$input =~ s/t/$c/g;
+
+		# Eval.
+		$ret = eval $input;
+		if ($EVAL_ERROR) {
+			err 'Error in function.',
+				'Error', $EVAL_ERROR;
+		}
+
+	# Callback.
+	} else {
+		$ret = $self->{'func'}->($self->{'counter'});
 	}
 
 	return $ret;
@@ -84,8 +102,13 @@ Video::Delay::Func - Video::Delay class for delays defined by math function.
 
 =item * C<func>
 
- Math function. 't' is time variable.
- Default value is '1000 * sin(t)'.
+ Math function in string with 't' time variable.
+ Or callback with one input argument as time variable.
+ Default value is reference to subroutine:
+   sub {
+     my $t = shift;
+     return 1000 * sin($t);
+   };
 
 =item * C<incr>
 
@@ -104,14 +127,43 @@ Video::Delay::Func - Video::Delay class for delays defined by math function.
 =head1 ERRORS
 
  new():
+         Parameter 'func' must be scalar or code.
          From Class::Utils::set_params():
                  Unknown parameter '%s'.
 
  delay():
-         Error in function
+         Error in function.
                  Error, %s
 
-=head1 EXAMPLE
+=head1 EXAMPLE1
+
+ # Pragmas.
+ use strict;
+ use warnings;
+
+ # Modules.
+ use Video::Delay::Func;
+
+ # Object.
+ my $obj = Video::Delay::Func->new(
+         'func' => sub {
+                 my $t = shift;
+                 return 1000 * sin($t);
+         },
+         'incr' => 0.1,
+ );
+
+ # Print delay.
+ print $obj->delay."\n";
+ print $obj->delay."\n";
+ print $obj->delay."\n";
+
+ # Output:
+ # 99.8334166468282
+ # 198.669330795061
+ # 295.52020666134
+
+=head1 EXAMPLE2
 
  # Pragmas.
  use strict;
@@ -163,6 +215,6 @@ BSD 2-Clause License
 
 =head1 VERSION
 
-0.02
+0.03
 
 =cut

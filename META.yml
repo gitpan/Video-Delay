@@ -4,6 +4,7 @@ author:
   - 'Michal Spacek <skim@cpan.org>'
 build_requires:
   English: 0
+  Error::Pure::Utils: 0.17
   ExtUtils::MakeMaker: 6.36
   File::Object: 0.05
   Test::More: 0
@@ -35,4 +36,4 @@ resources:
   homepage: https://github.com/tupinek/Video-Delay
   license: http://opensource.org/licenses/bsd-license.php
   repository: git://github.com/tupinek/Video-Delay
-version: '0.02'
+version: '0.03'
