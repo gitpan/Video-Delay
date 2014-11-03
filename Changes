@@ -1,3 +1,7 @@
+0.04 2014-11-03T12:55:54+01:00
+ [Video::Delay::Func]
+ - Fix test (precision).
+
 0.03 2014-11-03T07:29:41+01:00
  [Video::Delay::Array]
  - Add tests.
